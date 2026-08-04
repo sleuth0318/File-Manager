@@ -748,6 +748,64 @@
             </androidx.cardview.widget.CardView>
 
             <TextView
+                android:id="@+id/settingsBackupsLabel"
+                style="@style/SettingsSectionLabelStyle"
+                android:text="@string/backups"
+                tools:textColor="@color/primary"/>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/settingsBackupsHolder"
+                style="@style/SettingsSectionHolder"
+                app:cardCornerRadius="@dimen/activity_margin"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:id="@+id/settingsBackupsWrapper"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:id="@+id/settingsExportSettingsHolder"
+                        style="@style/SettingsHolderStyle">
+
+                        <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/settingsExportSettings"
+                            style="@style/SettingsTextLabelStyle"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="68dp"
+                            android:text="@string/export_settings" />
+
+                        <ImageView
+                            android:id="@+id/settingsExportSettingsChevron"
+                            style="@style/SettingsChevronStyle"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:contentDescription="@string/export_settings"/>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/settingsImportSettingsHolder"
+                        style="@style/SettingsHolderStyle">
+
+                        <com.goodwy.commons.views.MyTextView
+                            android:id="@+id/settingsImportSettings"
+                            style="@style/SettingsTextLabelStyle"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="68dp"
+                            android:text="@string/import_settings" />
+
+                        <ImageView
+                            android:id="@+id/settingsImportSettingsChevron"
+                            style="@style/SettingsChevronStyle"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:contentDescription="@string/import_settings"/>
+                    </RelativeLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
                 android:id="@+id/settingsOtherLabel"
                 style="@style/SettingsSectionLabelStyle"
                 android:text="@string/other"

@@ -11,6 +11,7 @@ import com.goodwy.filemanager.R
 import com.goodwy.filemanager.databinding.DialogManageVisibleTabsBinding
 import com.goodwy.filemanager.extensions.config
 import com.goodwy.filemanager.helpers.ALL_TABS_MASK
+import com.goodwy.filemanager.helpers.TAB_NETWORK
 
 class ManageVisibleTabsDialog(val activity: BaseSimpleActivity) {
     private val binding = DialogManageVisibleTabsBinding.inflate(activity.layoutInflater)
@@ -21,6 +22,7 @@ class ManageVisibleTabsDialog(val activity: BaseSimpleActivity) {
             put(TAB_RECENT_FILES, R.id.manage_visible_tabs_recent_files)
             put(TAB_FILES, R.id.manage_visible_tabs_files)
             put(TAB_STORAGE_ANALYSIS, R.id.manage_visible_tabs_storage_analysis)
+            put(TAB_NETWORK, R.id.manage_visible_tabs_network)
         }
 
         val showTabs = activity.config.showTabs

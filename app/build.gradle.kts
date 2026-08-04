@@ -33,7 +33,7 @@ android {
     compileSdk = project.libs.versions.app.build.compileSDKVersion.get().toInt()
 
     defaultConfig {
-        applicationId = project.property("APP_ID").toString()
+        applicationId = "dev.goodwy.filemanager"
         minSdk = project.libs.versions.app.build.minimumSDK.get().toInt()
         targetSdk = project.libs.versions.app.build.targetSDK.get().toInt()
         versionName = project.property("VERSION_NAME").toString()
@@ -114,6 +114,13 @@ android {
         includeInApk = false
     }
 
+    packaging {
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+        }
+    }
+
+
     androidResources {
         @Suppress("UnstableApiUsage")
         generateLocaleConfig = true
@@ -157,6 +164,7 @@ dependencies {
     implementation(libs.gestureviews)
     implementation(libs.autofittextview)
     implementation(libs.zip4j)
+    implementation(libs.apache.ftpserver.core)
     detektPlugins(libs.compose.detekt)
 
     //Goodwy

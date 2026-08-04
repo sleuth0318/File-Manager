@@ -38,6 +38,7 @@ import com.goodwy.filemanager.extensions.newAppRecommendation
 import com.goodwy.filemanager.extensions.tryOpenPathIntent
 import com.goodwy.filemanager.fragments.ItemsFragment
 import com.goodwy.filemanager.fragments.MyViewPagerFragment
+import com.goodwy.filemanager.fragments.NetworkFragment
 import com.goodwy.filemanager.fragments.RecentsFragment
 import com.goodwy.filemanager.fragments.StorageFragment
 import com.goodwy.filemanager.helpers.FOLDER_HOME
@@ -45,6 +46,7 @@ import com.goodwy.filemanager.helpers.FOLDER_INTERNAL
 import com.goodwy.filemanager.helpers.MAX_COLUMN_COUNT
 import com.goodwy.filemanager.helpers.RECENTS_FRAGMENT_PATH
 import com.goodwy.filemanager.helpers.RootHelpers
+import com.goodwy.filemanager.helpers.TAB_NETWORK
 import com.goodwy.filemanager.helpers.whatsNewList
 import com.goodwy.filemanager.interfaces.ItemOperationsListener
 import com.stericson.RootTools.RootTools
@@ -56,6 +58,7 @@ class MainActivity : SimpleActivity() {
     override var isSearchBarEnabled = true
 
     companion object {
+        const val EXTRA_OPEN_NETWORK_TAB = "open_network_tab"
         private const val BACK_PRESS_TIMEOUT = 5000
         private const val USAGE_STATS_RC = 202
         private const val PICKED_PATH = "picked_path"
@@ -90,6 +93,13 @@ class MainActivity : SimpleActivity() {
             }
         }
 
+        if (!config.wasNetworkTabAdded) {
+            config.wasNetworkTabAdded = true
+            if (config.showTabs and TAB_NETWORK == 0) {
+                config.showTabs = config.showTabs or TAB_NETWORK
+            }
+        }
+
         storeStateVariables()
         setupTabs()
 
@@ -100,6 +110,7 @@ class MainActivity : SimpleActivity() {
         setupEdgeToEdge(
             padBottomImeAndSystem = listOf(binding.mainTabsHolder)
         )
+        handleOpenNetworkTabIntent(intent)
 
         if (savedInstanceState == null) {
             config.temporarilyShowHidden = false
@@ -109,6 +120,12 @@ class MainActivity : SimpleActivity() {
             checkIfRootAvailable()
             checkInvalidFavorites()
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleOpenNetworkTabIntent(intent)
     }
 
     override fun onResume() {
@@ -174,7 +191,7 @@ class MainActivity : SimpleActivity() {
         if (binding.mainMenu.isSearchOpen) {
             binding.mainMenu.closeSearch()
             return true
-        } else if (currentFragment is RecentsFragment || currentFragment is StorageFragment) {
+        } else if (currentFragment is RecentsFragment || currentFragment is StorageFragment || currentFragment is NetworkFragment) {
             appLockManager.lock()
             return false
         } else if ((currentFragment as ItemsFragment).getBreadcrumbs().getItemCount() <= 1) {
@@ -205,7 +222,7 @@ class MainActivity : SimpleActivity() {
 
         binding.mainMenu.requireToolbar().menu.apply {
             findItem(R.id.sort).isVisible = currentFragment is ItemsFragment
-            findItem(R.id.change_view_type).isVisible = currentFragment !is StorageFragment
+            findItem(R.id.change_view_type).isVisible = currentFragment !is StorageFragment && currentFragment !is NetworkFragment
             findItem(R.id.change_view_type).setIcon(getViewTypeIcon())
             val properTextColor = getProperTextColor()
             findItem(R.id.change_view_type).iconTintList = ColorStateList.valueOf(properTextColor)
@@ -214,16 +231,16 @@ class MainActivity : SimpleActivity() {
             findItem(R.id.remove_favorite).isVisible = currentFragment is ItemsFragment && favorites.contains(currentFragment.currentPath)
             findItem(R.id.go_to_favorite).isVisible = currentFragment is ItemsFragment && favorites.isNotEmpty()
 
-            findItem(R.id.toggle_filename).isVisible = currentViewType == VIEW_TYPE_GRID && currentFragment !is StorageFragment
+            findItem(R.id.toggle_filename).isVisible = currentViewType == VIEW_TYPE_GRID && currentFragment !is StorageFragment && currentFragment !is NetworkFragment
             findItem(R.id.go_home).isVisible =
                 currentFragment is ItemsFragment && currentFragment.currentPath != config.homeFolder && config.showHomeButton
                     && currentFragment.currentPath != "" //so that it doesn't appear for a moment when the app is launched
             findItem(R.id.set_as_home).isVisible = currentFragment is ItemsFragment && currentFragment.currentPath != config.homeFolder
 
-            findItem(R.id.temporarily_show_hidden).isVisible = !config.shouldShowHidden() && currentFragment !is StorageFragment
-            findItem(R.id.stop_showing_hidden).isVisible = config.temporarilyShowHidden && currentFragment !is StorageFragment
+            findItem(R.id.temporarily_show_hidden).isVisible = !config.shouldShowHidden() && currentFragment !is StorageFragment && currentFragment !is NetworkFragment
+            findItem(R.id.stop_showing_hidden).isVisible = config.temporarilyShowHidden && currentFragment !is StorageFragment && currentFragment !is NetworkFragment
 
-            findItem(R.id.column_count).isVisible = currentViewType == VIEW_TYPE_GRID && currentFragment !is StorageFragment
+            findItem(R.id.column_count).isVisible = currentViewType == VIEW_TYPE_GRID && currentFragment !is StorageFragment && currentFragment !is NetworkFragment
 
             findItem(R.id.settings).isVisible = !isCreateDocumentIntent
             findItem(R.id.about).isVisible = !isCreateDocumentIntent
@@ -337,6 +354,28 @@ class MainActivity : SimpleActivity() {
                 }
             }
         }
+    }
+
+    private fun handleOpenNetworkTabIntent(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_OPEN_NETWORK_TAB, false) != true) {
+            return
+        }
+
+        val networkTabIndex = getVisibleTabIndex(TAB_NETWORK) ?: return
+        if (binding.mainViewPager.adapter == null) {
+            config.lastUsedViewPagerPage = networkTabIndex
+        } else {
+            binding.mainViewPager.currentItem = networkTabIndex
+            binding.mainTabsHolder.getTabAt(networkTabIndex)?.select()
+            refreshMenuItems()
+        }
+        intent.removeExtra(EXTRA_OPEN_NETWORK_TAB)
+    }
+
+    private fun getVisibleTabIndex(tab: Int): Int? {
+        val visibleTabs = mTabsToShow.filter { config.showTabs and it != 0 }
+        val index = visibleTabs.indexOf(tab)
+        return if (index >= 0) index else null
     }
 
     private fun storeStateVariables() {
@@ -456,6 +495,7 @@ class MainActivity : SimpleActivity() {
 
         if (isPickFileIntent) {
             mTabsToShow.remove(TAB_STORAGE_ANALYSIS)
+            mTabsToShow.remove(TAB_NETWORK)
             if (mTabsToShow.none { it and config.showTabs != 0 }) {
                 config.showTabs = TAB_FILES
                 mStoredShowTabs = TAB_FILES
@@ -521,7 +561,8 @@ class MainActivity : SimpleActivity() {
         val drawableId = when (position) {
             0 -> R.drawable.ic_clock_filled
             1 -> R.drawable.ic_folder_closed
-            else -> R.drawable.ic_storage_vector
+            2 -> R.drawable.ic_storage_vector
+            else -> R.drawable.ic_network_vector
         }
 
         return resources.getColoredDrawableWithColor(drawableId, getProperTextColor())
@@ -531,7 +572,8 @@ class MainActivity : SimpleActivity() {
         val stringId = when (position) {
             0 -> R.string.recents
             1 -> R.string.files_tab
-            else -> R.string.storage
+            2 -> R.string.storage
+            else -> R.string.network
         }
 
         return resources.getString(stringId)
@@ -790,6 +832,10 @@ class MainActivity : SimpleActivity() {
             icons.add(R.drawable.ic_storage_scaled)
         }
 
+        if (showTabs and TAB_NETWORK != 0) {
+            icons.add(R.drawable.ic_network_scaled)
+        }
+
         return icons
     }
 
@@ -809,14 +855,19 @@ class MainActivity : SimpleActivity() {
             icons.add(R.drawable.ic_storage_vector)
         }
 
+        if (showTabs and TAB_NETWORK != 0) {
+            icons.add(R.drawable.ic_network_vector)
+        }
+
         return icons
     }
 
     private fun getRecentsFragment() = findViewById<RecentsFragment>(R.id.recents_fragment)
     private fun getItemsFragment() = findViewById<ItemsFragment>(R.id.items_fragment)
     private fun getStorageFragment() = findViewById<StorageFragment>(R.id.storage_fragment)
+    private fun getNetworkFragment() = findViewById<NetworkFragment>(R.id.network_fragment)
     private fun getAllFragments(): ArrayList<MyViewPagerFragment<*>?> =
-        arrayListOf(getRecentsFragment(), getItemsFragment(), getStorageFragment())
+        arrayListOf(getRecentsFragment(), getItemsFragment(), getStorageFragment(), getNetworkFragment())
 
     private fun getCurrentFragment(): MyViewPagerFragment<*>? {
         val showTabs = config.showTabs
@@ -833,10 +884,14 @@ class MainActivity : SimpleActivity() {
             fragments.add(getStorageFragment())
         }
 
+        if (showTabs and TAB_NETWORK != 0) {
+            fragments.add(getNetworkFragment())
+        }
+
         return fragments.getOrNull(binding.mainViewPager.currentItem)
     }
 
-    private fun getTabsList() = arrayListOf(TAB_RECENT_FILES, TAB_FILES, TAB_STORAGE_ANALYSIS)
+    private fun getTabsList() = arrayListOf(TAB_RECENT_FILES, TAB_FILES, TAB_STORAGE_ANALYSIS, TAB_NETWORK)
 
     private fun checkWhatsNewDialog() {
         whatsNewList().apply {

@@ -4,6 +4,9 @@
     android:installLocation="auto">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -62,6 +65,12 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/AppTheme"
         tools:replace="android:label">
+
+        <service
+            android:name=".services.FtpServerService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:stopWithTask="false" />
 
         <activity
             android:name=".activities.SplashActivity"
@@ -220,7 +229,7 @@
         </provider>
 
         <activity-alias
-            android:name=".activities.SplashActivity.Original"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.Original"
             android:enabled="true"
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
@@ -233,7 +242,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".activities.SplashActivity.One"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.One"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_one"
@@ -246,7 +255,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".activities.SplashActivity.Two"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.Two"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_two"
@@ -260,7 +269,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".activities.SplashActivity.Three"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.Three"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_three"
@@ -274,7 +283,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".activities.SplashActivity.Four"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.Four"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_four"
@@ -288,7 +297,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".activities.SplashActivity.Five"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.Five"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_five"
@@ -302,7 +311,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".activities.SplashActivity.Six"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.Six"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_six"
@@ -316,7 +325,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".activities.SplashActivity.Seven"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.Seven"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_seven"
@@ -330,7 +339,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".activities.SplashActivity.Eight"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.Eight"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_eight"
@@ -344,7 +353,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".activities.SplashActivity.Nine"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.Nine"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_nine"
@@ -358,7 +367,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".activities.SplashActivity.Ten"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.Ten"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_ten"
@@ -372,7 +381,7 @@
         </activity-alias>
 
         <activity-alias
-            android:name=".activities.SplashActivity.Eleven"
+            android:name="dev.goodwy.filemanager.activities.SplashActivity.Eleven"
             android:enabled="false"
             android:exported="true"
             android:icon="@mipmap/ic_launcher_eleven"
