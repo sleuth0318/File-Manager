@@ -1,0 +1,10 @@
+*.iml
+*.aab
+.gradle
+/.idea/
+.DS_Store
+/build
+/captures
+fastlane/fastlane.json
+fastlane/report.xml
+.kotlin/

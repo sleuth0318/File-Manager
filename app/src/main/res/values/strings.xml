@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_launcher_name">File Manager</string>
+    <string name="press_back_again">Press back again to exit</string>
+    <string name="go_to_home_folder">Go to home folder</string>
+    <string name="set_as_home_folder">Set as home folder</string>
+    <string name="home_folder_updated">Home folder updated</string>
+    <string name="copy_path">Copy path to clipboard</string>
+    <string name="path_copied">Path copied</string>
+    <string name="select_audio_file">Please select an audio file</string>
+    <string name="search_folder">Search folder</string>
+    <string name="rooted_device_only">This operation works only on rooted devices</string>
+    <string name="recents">Recents</string>
+    <string name="network">Network</string>
+    <string name="access_from_network">Access from network</string>
+    <string name="ftp_server_running">FTP server is running</string>
+    <string name="ftp_server_starting">Starting FTP server…</string>
+    <string name="ftp_no_local_ip_error">No local network IP address found. Connect to Wi-Fi or enable hotspot and try again.</string>
+    <string name="ftp_notification_channel_name">FTP server</string>
+    <string name="ftp_notification_channel_description">Persistent notification shown while FTP access from network is active.</string>
+    <string name="stop_service">Stop service</string>
+    <string name="ftp_same_network_or_hotspot">Access from Network</string>
+    <string name="show_hidden_files">Show hidden files</string>
+    <string name="ftp_start_service_description">Start the service to access files from another device.</string>
+    <string name="start_service">Start service</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="ftp_enter_address_description">Enter the above address in a file explorer or FTP client on PC.</string>
+    <string name="ftp_address_not_available">FTP address unavailable</string>
+    <string name="show_recents">Show recents</string>
+    <string name="invert_colors">Invert colors</string>
+
+    <!-- Open as -->
+    <string name="open_as">Open as</string>
+    <string name="text_file">Text file</string>
+    <string name="image_file">Image file</string>
+    <string name="audio_file">Audio file</string>
+    <string name="video_file">Video file</string>
+    <string name="other_file">Other file</string>
+
+    <!-- Compression -->
+    <string name="compress">Compress</string>
+    <string name="decompress">Decompress</string>
+    <string name="compress_as">Compress as</string>
+    <string name="compressing">Compressing…</string>
+    <string name="decompressing">Decompressing…</string>
+    <string name="compression_successful">Compression successful</string>
+    <string name="decompression_successful">Decompression successful</string>
+    <string name="compressing_failed">Compressing failed</string>
+    <string name="decompressing_failed">Decompressing failed</string>
+
+    <!-- Favorites -->
+    <string name="manage_favorites">Manage favorites</string>
+    <string name="go_to_favorite">Go to favorite</string>
+    <string name="favorites_activity_placeholder">You can add frequently used folders to favorites for easy access from anywhere.</string>
+
+    <!-- File Editor -->
+    <string name="file_editor">File Editor</string>
+
+    <!-- Storage analysis -->
+    <string name="storage_analysis">Storage analysis</string>
+    <string name="images">Images</string>
+    <string name="videos">Videos</string>
+    <string name="audio">Audio</string>
+    <string name="documents">Documents</string>
+    <string name="downloads">Downloads</string>
+    <string name="archives">Archives</string>
+    <string name="others">Others</string>
+    <string name="storage_free">free</string>
+    <string name="total_storage">Total storage: %s</string>
+
+    <!-- Settings -->
+    <string name="enable_root_access">Enable root access</string>
+    <string name="press_back_twice">Require pressing Back twice to leave the app</string>
+
+    <string name="backups">Backups</string>
+    <string name="export_settings">Export settings</string>
+    <string name="import_settings">Import settings</string>
+    <string name="settings_export_filename_hint">Filename (without .txt)</string>
+    <string name="settings_export_successful">Settings exported successfully</string>
+    <string name="settings_import_successful">Settings imported successfully. Restart the app to apply all changes.</string>
+    <string name="settings_import_failed">Importing settings failed</string>
+    <string name="xapk_no_apks_found">No APK files found inside this XAPK</string>
+    <string name="xapk_install_failed">XAPK install failed</string>
+</resources>
