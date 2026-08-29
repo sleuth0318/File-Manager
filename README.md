@@ -13,9 +13,7 @@ Allows installing bundle application files (.apks/.xapk)
 Allows changing file last modified date and time to arbitrary value in properties menu.
 
 <img src="app/src/gplay/res/date_picker.png" width="200" alt="Date Picker"/> &nbsp; &nbsp; &nbsp; &nbsp;
-<img src="app/src/gplay/res/time_picker.png" width="200" alt="Time Picker"/>
-
-<br><br>
+<img src="app/src/gplay/res/time_picker.png" width="200" alt="Time Picker"/> <br><br>
 ## Wireless File Sharing (FTP Server)
 This update expands the navigation with a dedicated 4th UI screen featuring a built-in FTP server. Seamlessly transfer and manage files wirelessly between your Android device and PC or local network—without relying on third-party cloud services or external servers. All transfers stay strictly within your local Wi-Fi/Hotspot connection, keeping your data private and on your device, always.
 
