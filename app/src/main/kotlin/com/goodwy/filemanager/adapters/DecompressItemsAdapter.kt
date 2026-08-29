@@ -22,6 +22,9 @@ import com.goodwy.filemanager.activities.SimpleActivity
 import com.goodwy.filemanager.databinding.ItemDecompressionListFileDirBinding
 import com.goodwy.filemanager.extensions.config
 import com.goodwy.filemanager.models.ListItem
+import java.io.File
+import java.io.FileOutputStream
+import java.util.zip.ZipFile
 import java.util.Locale
 
 class DecompressItemsAdapter(activity: SimpleActivity, var listItems: MutableList<ListItem>, recyclerView: MyRecyclerView, itemClick: (Any) -> Unit) :
@@ -116,18 +119,47 @@ class DecompressItemsAdapter(activity: SimpleActivity, var listItems: MutableLis
     }
 
     private fun getImagePathToLoad(path: String): Any {
-        return if (path.endsWith(".apk", true)) {
-            val packageInfo = activity.packageManager.getPackageArchiveInfo(path, PackageManager.GET_ACTIVITIES)
-            val appInfo = packageInfo?.applicationInfo
-            if (appInfo != null) {
-                appInfo.sourceDir = path
-                appInfo.publicSourceDir = path
-                appInfo.loadIcon(activity.packageManager)
-            } else {
-                path
+        return when {
+            path.endsWith(".apk", true) -> getApkIcon(path) ?: path
+            path.endsWith(".xapk", true) || path.endsWith(".apks", true) -> getSplitApkArchiveIcon(path) ?: path
+            else -> path
+        }
+    }
+
+    private fun getApkIcon(path: String): Drawable? {
+        val packageInfo = activity.packageManager.getPackageArchiveInfo(path, PackageManager.GET_ACTIVITIES)
+        val appInfo = packageInfo?.applicationInfo ?: return null
+        appInfo.sourceDir = path
+        appInfo.publicSourceDir = path
+        return appInfo.loadIcon(activity.packageManager)
+    }
+
+    private fun getSplitApkArchiveIcon(path: String): Drawable? {
+        return try {
+            val cacheFolder = File(activity.cacheDir, "split_apk_icons").apply { mkdirs() }
+            val tempApk = File(cacheFolder, "${path.hashCode()}_${File(path).lastModified()}.apk")
+            if (!tempApk.exists()) {
+                ZipFile(File(path)).use { zipFile ->
+                    val entry = zipFile.entries().asSequence()
+                        .filter { !it.isDirectory && it.name.endsWith(".apk", true) }
+                        .sortedBy { entry ->
+                            val name = entry.name.substringAfterLast('/')
+                            when {
+                                name.equals("base.apk", true) -> 0
+                                !name.startsWith("config.", true) && !name.startsWith("split_config.", true) -> 1
+                                else -> 2
+                            }
+                        }
+                        .firstOrNull() ?: return null
+
+                    zipFile.getInputStream(entry).use { inputStream ->
+                        FileOutputStream(tempApk).use { outputStream -> inputStream.copyTo(outputStream) }
+                    }
+                }
             }
-        } else {
-            path
+            getApkIcon(tempApk.absolutePath)
+        } catch (_: Exception) {
+            null
         }
     }
 

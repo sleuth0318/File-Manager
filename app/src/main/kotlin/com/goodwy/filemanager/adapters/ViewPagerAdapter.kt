@@ -13,6 +13,7 @@ import com.goodwy.filemanager.R
 import com.goodwy.filemanager.activities.SimpleActivity
 import com.goodwy.filemanager.extensions.config
 import com.goodwy.filemanager.fragments.MyViewPagerFragment
+import com.goodwy.filemanager.helpers.TAB_NETWORK
 
 class ViewPagerAdapter(val activity: SimpleActivity, val tabsToShow: ArrayList<Int>) : PagerAdapter() {
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
@@ -73,6 +74,10 @@ class ViewPagerAdapter(val activity: SimpleActivity, val tabsToShow: ArrayList<I
 
         if (showTabs and TAB_STORAGE_ANALYSIS != 0) {
             fragments.add(R.layout.storage_fragment)
+        }
+
+        if (showTabs and TAB_NETWORK != 0 && tabsToShow.contains(TAB_NETWORK)) {
+            fragments.add(R.layout.network_fragment)
         }
 
         return fragments[position]

@@ -123,6 +123,14 @@ class Config(context: Context) : BaseConfig(context) {
         get() = prefs.getBoolean(WAS_STORAGE_ANALYSIS_TAB_ADDED, false)
         set(wasStorageAnalysisTabAdded) = prefs.edit().putBoolean(WAS_STORAGE_ANALYSIS_TAB_ADDED, wasStorageAnalysisTabAdded).apply()
 
+    var wasNetworkTabAdded: Boolean
+        get() = prefs.getBoolean(WAS_NETWORK_TAB_ADDED, false)
+        set(wasNetworkTabAdded) = prefs.edit().putBoolean(WAS_NETWORK_TAB_ADDED, wasNetworkTabAdded).apply()
+
+    var ftpUsername: String
+        get() = prefs.getString(FTP_USERNAME, "nothing") ?: "nothing"
+        set(ftpUsername) = prefs.edit().putString(FTP_USERNAME, ftpUsername.ifBlank { "nothing" }).apply()
+
     //Goodwy
     var showFolderIcon: Boolean
         get() = prefs.getBoolean(SHOW_FOLDER_ICON, true)

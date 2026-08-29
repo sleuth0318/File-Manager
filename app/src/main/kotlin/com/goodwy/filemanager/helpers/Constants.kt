@@ -24,6 +24,8 @@ const val FILE_LANDSCAPE_COLUMN_CNT = "file_landscape_column_cnt"
 const val DISPLAY_FILE_NAMES = "display_file_names"
 const val SHOW_TABS = "show_tabs"
 const val WAS_STORAGE_ANALYSIS_TAB_ADDED = "was_storage_analysis_tab_added"
+const val WAS_NETWORK_TAB_ADDED = "was_network_tab_added"
+const val FTP_USERNAME = "ftp_username"
 // Goodwy
 const val SHOW_FOLDER_ICON = "show_folder_icon"
 const val CHECK_APP_OPS_SERVICE = "check_app_ops_service"
@@ -49,7 +51,8 @@ const val OPEN_AS_AUDIO = 3
 const val OPEN_AS_VIDEO = 4
 const val OPEN_AS_OTHER = 5
 
-const val ALL_TABS_MASK = TAB_RECENT_FILES or TAB_FILES or TAB_STORAGE_ANALYSIS
+const val TAB_NETWORK = 1 shl 20
+const val ALL_TABS_MASK = TAB_RECENT_FILES or TAB_FILES or TAB_STORAGE_ANALYSIS or TAB_NETWORK
 
 const val IMAGES = "images"
 const val VIDEOS = "videos"

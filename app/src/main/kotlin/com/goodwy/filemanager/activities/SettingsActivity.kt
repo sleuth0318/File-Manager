@@ -3,10 +3,14 @@ package com.goodwy.filemanager.activities
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
+import androidx.appcompat.app.AlertDialog
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.edit
 import androidx.core.content.res.ResourcesCompat
 import com.goodwy.commons.dialogs.*
 import com.goodwy.commons.extensions.*
@@ -15,6 +19,7 @@ import com.goodwy.commons.models.RadioItem
 import com.goodwy.filemanager.BuildConfig
 import com.goodwy.filemanager.R
 import com.goodwy.filemanager.databinding.ActivitySettingsBinding
+import com.goodwy.filemanager.databinding.DialogExportSettingsBinding
 import com.goodwy.filemanager.dialogs.ManageVisibleTabsDialog
 import com.goodwy.filemanager.extensions.config
 import com.goodwy.filemanager.extensions.launchAbout
@@ -23,8 +28,12 @@ import com.goodwy.filemanager.helpers.*
 import com.google.android.material.snackbar.Snackbar
 import com.mikhaellopez.rxanimation.RxAnimation
 import com.mikhaellopez.rxanimation.shake
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 import kotlin.system.exitProcess
+import org.json.JSONArray
+import org.json.JSONObject
 
 class SettingsActivity : SimpleActivity() {
     private val binding by viewBinding(ActivitySettingsBinding::inflate)
@@ -38,6 +47,14 @@ class SettingsActivity : SimpleActivity() {
     private val subscriptionYearIdX1 = BuildConfig.SUBSCRIPTION_YEAR_ID_X1
     private val subscriptionYearIdX2 = BuildConfig.SUBSCRIPTION_YEAR_ID_X2
     private val subscriptionYearIdX3 = BuildConfig.SUBSCRIPTION_YEAR_ID_X3
+
+    private val exportSettingsLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
+        uri?.let { exportSettingsToUri(it) }
+    }
+
+    private val importSettingsLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { importSettingsFromUri(it) }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,6 +136,7 @@ class SettingsActivity : SimpleActivity() {
         setupThumbnailsSize()
         setupShowOnlyFilename()
 
+        setupBackups()
         setupTipJar()
         setupAbout()
 
@@ -134,6 +152,7 @@ class SettingsActivity : SimpleActivity() {
                 settingsSecurityLabel,
                 settingsTopAppBarLabel,
                 settingsListViewLabel,
+                settingsBackupsLabel,
                 settingsOtherLabel
             ).forEach {
                 it.setTextColor(getProperPrimaryColor())
@@ -150,6 +169,7 @@ class SettingsActivity : SimpleActivity() {
                 settingsSecurityHolder,
                 settingsTopAppBarHolder,
                 settingsListViewHolder,
+                settingsBackupsHolder,
                 settingsOtherHolder
             ).forEach {
                 it.setCardBackgroundColor(getSurfaceColor())
@@ -162,6 +182,8 @@ class SettingsActivity : SimpleActivity() {
                 settingsManageShownTabsChevron,
                 settingsManageFavoritesChevron,
                 settingsChangeDateTimeFormatChevron,
+                settingsExportSettingsChevron,
+                settingsImportSettingsChevron,
                 settingsTipJarChevron,
                 settingsAboutChevron
             ).forEach {
@@ -818,6 +840,104 @@ class SettingsActivity : SimpleActivity() {
                 settingsChangeColourTopBar.toggle()
                 config.changeColourTopBar = settingsChangeColourTopBar.isChecked
                 config.needRestart = true
+            }
+        }
+    }
+
+    private fun setupBackups() = binding.apply {
+        settingsExportSettingsHolder.setOnClickListener {
+            showExportSettingsDialog()
+        }
+        settingsImportSettingsHolder.setOnClickListener {
+            importSettingsLauncher.launch(arrayOf("text/plain", "application/json", "*/*"))
+        }
+    }
+
+    private fun showExportSettingsDialog() {
+        val defaultName = "file-manager-settings_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())}"
+        val dialogBinding = DialogExportSettingsBinding.inflate(layoutInflater).apply {
+            exportSettingsFilename.setText(defaultName)
+            exportSettingsFilename.setSelection(exportSettingsFilename.text?.length ?: 0)
+        }
+
+        getAlertDialogBuilder()
+            .setPositiveButton(R.string.ok, null)
+            .setNegativeButton(R.string.cancel, null)
+            .apply {
+                setupDialogStuff(dialogBinding.root, this, R.string.export_settings) { alertDialog ->
+                    alertDialog.showKeyboard(dialogBinding.exportSettingsFilename)
+                    alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                        val filename = dialogBinding.exportSettingsFilename.text.toString().trim().ifEmpty { defaultName }.removeSuffix(".txt")
+                        exportSettingsLauncher.launch("$filename.txt")
+                        alertDialog.dismiss()
+                    }
+                }
+            }
+    }
+
+    private fun exportSettingsToUri(uri: Uri) {
+        try {
+            contentResolver.openOutputStream(uri)?.bufferedWriter()?.use {
+                it.write(createSettingsBackupJson().toString(2))
+            }
+            toast(R.string.settings_export_successful)
+        } catch (exception: Exception) {
+            showErrorToast(exception)
+        }
+    }
+
+    private fun importSettingsFromUri(uri: Uri) {
+        try {
+            val json = contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() } ?: return
+            restoreSettingsBackupJson(JSONObject(json))
+            toast(R.string.settings_import_successful)
+            config.needRestart = true
+        } catch (exception: Exception) {
+            toast(R.string.settings_import_failed)
+            showErrorToast(exception)
+        }
+    }
+
+    private fun createSettingsBackupJson(): JSONObject {
+        val preferences = JSONArray()
+        getSharedPrefs().all.toSortedMap().forEach { (key, value) ->
+            val item = JSONObject().put("key", key)
+            when (value) {
+                is Boolean -> item.put("type", "boolean").put("value", value)
+                is Int -> item.put("type", "int").put("value", value)
+                is Long -> item.put("type", "long").put("value", value)
+                is Float -> item.put("type", "float").put("value", value.toDouble())
+                is String -> item.put("type", "string").put("value", value)
+                is Set<*> -> item.put("type", "string_set").put("value", JSONArray(value.filterIsInstance<String>().sorted()))
+                else -> return@forEach
+            }
+            preferences.put(item)
+        }
+
+        return JSONObject()
+            .put("format", "goodwy-file-manager-settings")
+            .put("version", 1)
+            .put("preferences", preferences)
+    }
+
+    private fun restoreSettingsBackupJson(json: JSONObject) {
+        val preferences = json.getJSONArray("preferences")
+        getSharedPrefs().edit {
+            clear()
+            for (index in 0 until preferences.length()) {
+                val item = preferences.getJSONObject(index)
+                val key = item.getString("key")
+                when (item.getString("type")) {
+                    "boolean" -> putBoolean(key, item.getBoolean("value"))
+                    "int" -> putInt(key, item.getInt("value"))
+                    "long" -> putLong(key, item.getLong("value"))
+                    "float" -> putFloat(key, item.getDouble("value").toFloat())
+                    "string" -> putString(key, item.getString("value"))
+                    "string_set" -> {
+                        val values = item.getJSONArray("value")
+                        putStringSet(key, (0 until values.length()).map { values.getString(it) }.toSet())
+                    }
+                }
             }
         }
     }

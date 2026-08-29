@@ -40,6 +40,7 @@ import com.goodwy.filemanager.activities.SimpleActivity
 import com.goodwy.filemanager.activities.SplashActivity
 import com.goodwy.filemanager.databinding.*
 import com.goodwy.filemanager.dialogs.CompressAsDialog
+import com.goodwy.filemanager.dialogs.PropertiesDialog
 import com.goodwy.filemanager.extensions.*
 import com.goodwy.filemanager.helpers.*
 import com.goodwy.filemanager.interfaces.ItemOperationsListener
@@ -57,8 +58,10 @@ import net.lingala.zip4j.model.enums.EncryptionMethod
 import java.io.BufferedInputStream
 import java.io.Closeable
 import java.io.File
+import java.io.FileOutputStream
 import java.util.LinkedList
 import java.util.Locale
+import java.util.zip.ZipFile
 
 class ItemsAdapter(
     activity: SimpleActivity,
@@ -1269,16 +1272,9 @@ class ItemsAdapter(
 
     private fun getImagePathToLoad(path: String): Any {
         var itemToLoad = if (path.endsWith(".apk", true)) {
-            val packageInfo =
-                activity.packageManager.getPackageArchiveInfo(path, PackageManager.GET_ACTIVITIES)
-            val appInfo = packageInfo?.applicationInfo
-            if (appInfo != null) {
-                appInfo.sourceDir = path
-                appInfo.publicSourceDir = path
-                appInfo.loadIcon(activity.packageManager)
-            } else {
-                path
-            }
+            getApkIcon(path) ?: path
+        } else if (path.endsWith(".xapk", true) || path.endsWith(".apks", true)) {
+            getSplitApkArchiveIcon(path) ?: path
         } else {
             path
         }
@@ -1290,6 +1286,43 @@ class ItemsAdapter(
         }
 
         return itemToLoad
+    }
+
+    private fun getApkIcon(path: String): Drawable? {
+        val packageInfo = activity.packageManager.getPackageArchiveInfo(path, PackageManager.GET_ACTIVITIES)
+        val appInfo = packageInfo?.applicationInfo ?: return null
+        appInfo.sourceDir = path
+        appInfo.publicSourceDir = path
+        return appInfo.loadIcon(activity.packageManager)
+    }
+
+    private fun getSplitApkArchiveIcon(path: String): Drawable? {
+        return try {
+            val cacheFolder = File(activity.cacheDir, "split_apk_icons").apply { mkdirs() }
+            val tempApk = File(cacheFolder, "${path.hashCode()}_${File(path).lastModified()}.apk")
+            if (!tempApk.exists()) {
+                ZipFile(File(path)).use { zipFile ->
+                    val entry = zipFile.entries().asSequence()
+                        .filter { !it.isDirectory && it.name.endsWith(".apk", true) }
+                        .sortedBy { entry ->
+                            val name = entry.name.substringAfterLast('/')
+                            when {
+                                name.equals("base.apk", true) -> 0
+                                !name.startsWith("config.", true) && !name.startsWith("split_config.", true) -> 1
+                                else -> 2
+                            }
+                        }
+                        .firstOrNull() ?: return null
+
+                    zipFile.getInputStream(entry).use { inputStream ->
+                        FileOutputStream(tempApk).use { outputStream -> inputStream.copyTo(outputStream) }
+                    }
+                }
+            }
+            getApkIcon(tempApk.absolutePath)
+        } catch (_: Exception) {
+            null
+        }
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")

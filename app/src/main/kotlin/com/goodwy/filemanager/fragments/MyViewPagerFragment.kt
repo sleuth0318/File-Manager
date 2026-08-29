@@ -13,6 +13,7 @@ import com.goodwy.filemanager.R
 import com.goodwy.filemanager.activities.MainActivity
 import com.goodwy.filemanager.activities.SimpleActivity
 import com.goodwy.filemanager.databinding.ItemsFragmentBinding
+import com.goodwy.filemanager.databinding.NetworkFragmentBinding
 import com.goodwy.filemanager.databinding.RecentsFragmentBinding
 import com.goodwy.filemanager.databinding.StorageFragmentBinding
 import com.goodwy.filemanager.extensions.isPathOnRoot
@@ -113,6 +114,10 @@ abstract class MyViewPagerFragment<BINDING : MyViewPagerFragment.InnerBinding>(c
     }
 
     class StorageInnerBinding(val binding: StorageFragmentBinding) : InnerBinding {
+        override val itemsFab: MyFloatingActionButton? = null
+    }
+
+    class NetworkInnerBinding(val binding: NetworkFragmentBinding) : InnerBinding {
         override val itemsFab: MyFloatingActionButton? = null
     }
 }
